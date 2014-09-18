@@ -118,8 +118,8 @@ void eval(char *cmdline)
     if (argv[0] == NULL)
         return;
         /* Ignore empty lines */
-    if (!builtin_command(argv)) {
-        if ((pid = Fork()) == 0) {
+    if (!builtin_cmd(argv)) {
+        if ((pid = fork()) == 0) {
         /* Child runs user job */
             if (execve(argv[0], argv, environ) < 0) {
                 printf("%s: Command not found.\n", argv[0]);
