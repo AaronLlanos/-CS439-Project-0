@@ -9,5 +9,16 @@
 
 int main(int argc, char **argv)
 {
-  return 0;
+  if(argc != 2){
+  	exit(1);
+  }
+  else{
+  	pid_t n = (pid_t)strtol(argv[1], NULL, 0);
+  	int val = kill(n, SIGKILL);
+  	if(val == -1){
+  		printf("Couldnt find PID: %d\n", (int)n);
+  		exit(1);
+  	}
+  	return 0;
+  }
 }
