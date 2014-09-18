@@ -57,10 +57,48 @@ int main(int argc, char **argv)
  * a new child for each call. Each process should call
  * doFib() exactly once.
  */
-static void 
-doFib(int n, int doPrint)
+static void doFib(int n, int doPrint)
 {
-  
+  //Base case, return n if n<2
+  if (n < 2){
+    if(doPrint){
+      printf("%d\n", n);
+    }
+    exit(n);
+  }
+  else{
+    pid_t pid1, pid2;
+    int status1, status2;
+
+    pid1 = fork();
+
+      /* Code executed by first child */
+      if (pid1 == 0) {     
+        doFib(n-1, 0);
+      } 
+      /* Code executed by first parent */
+      else {     
+
+        wait(&status1);
+        //Reap first Child
+        status1 = WEXITSTATUS(status1);
+
+        pid2 = fork();
+        /* Code executed by second child */
+        if (pid2 == 0) {     
+          doFib(n-2, 0);
+        } 
+        /* Code executed by second parent */
+        else {       
+          wait(&status2);
+          //Reap second child
+          status2 = WEXITSTATUS(status2);
+          if(doPrint){
+            printf("%d\n", status1+status2);
+          }
+          exit(status1+status2);
+        }
+      }
+  }
+
 }
-
-
