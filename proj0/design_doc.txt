@@ -87,7 +87,7 @@ Questions regarding Part 1
 (3) After the instruction identified in the previous question executes, 
   what is the next assembly language instruction executed?
 
-
+  
 
 (4) When the signal handler finishes running, it must restore all of
   the registers from the interrupted thread to exactly their values

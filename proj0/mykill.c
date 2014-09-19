@@ -13,7 +13,7 @@ int main(int argc, char **argv)
   	exit(1);
   }
   else{
-  	pid_t n = (pid_t)strtol(argv[1], NULL, 0);
+  	pid_t n = (pid_t)atoi(argv[1]);
   	int val = kill(n, SIGUSR1);
   	if(val == -1){
   		printf("Couldnt find PID: %d\n", (int)n);

@@ -59,18 +59,18 @@ int main(int argc, char **argv)
     /* Parse the command line */
     while ((c = getopt(argc, argv, "hvp")) != EOF) {
         switch (c) {
-        case 'h':             /* print help message */
-            usage();
-	    break;
-        case 'v':             /* emit additional diagnostic info */
-            verbose = 1;
-	    break;
-        case 'p':             /* don't print a prompt */
-            emit_prompt = 0;  /* handy for automatic testing */
-	    break;
-	default:
-            usage();
-	}
+            case 'h':             /* print help message */
+                usage();
+    	    break;
+            case 'v':             /* emit additional diagnostic info */
+                verbose = 1;
+    	    break;
+            case 'p':             /* don't print a prompt */
+                emit_prompt = 0;  /* handy for automatic testing */
+    	    break;
+        	default:
+                usage();
+    	}
     }
 
     /* Install the signal handlers */
@@ -89,22 +89,22 @@ int main(int argc, char **argv)
     /* Execute the shell's read/eval loop */
     while (1) {
 
-	/* Read command line */
-	if (emit_prompt) {
-	    printf("%s", prompt);
-	    fflush(stdout);
-	}
-	if ((fgets(cmdline, MAXLINE, stdin) == NULL) && ferror(stdin))
-	    app_error("fgets error");
-	if (feof(stdin)) { /* End of file (ctrl-d) */
-	    fflush(stdout);
-	    exit(0);
-	}
+    	/* Read command line */
+    	if (emit_prompt) {
+    	    printf("%s", prompt);
+    	    fflush(stdout);
+    	}
+    	if ((fgets(cmdline, MAXLINE, stdin) == NULL) && ferror(stdin))
+    	    app_error("fgets error");
+    	if (feof(stdin)) { /* End of file (ctrl-d) */
+    	    fflush(stdout);
+    	    exit(0);
+    	}
 
-	/* Evaluate the command line */
-	eval(cmdline);
-	fflush(stdout);
-	fflush(stdout);
+    	/* Evaluate the command line */
+    	eval(cmdline);
+    	fflush(stdout);
+    	fflush(stdout);
     } 
 
     exit(0); /* control never reaches here */
@@ -137,9 +137,19 @@ void eval(char *cmdline)
     if (argv[0] == NULL)
         return;
         /* Ignore empty lines */
+
+    sigset_t mask;
+    sigemptyset(&mask);
+    sigaddset(&mask, SIGCHLD);
+
     if (!builtin_cmd(argv)) {
+        
+        sigprocmask(SIG_BLOCK, &mask, NULL);
+
         if ((pid = fork()) == 0) {
         /* Child runs user job */
+            sigprocmask(SIG_UNBLOCK, &mask, NULL);
+            setpgid(0, 0);
             if (execve(argv[0], argv, environ) < 0) {
                 printf("%s: Command not found.\n", argv[0]);
                 exit(0);
@@ -147,12 +157,18 @@ void eval(char *cmdline)
         }
         /* Parent waits for foreground job to terminate */
         if (!bg) {
-            int status;
-        if (waitpid(pid, &status, 0) < 0)
-            unix_error("waitfg: waitpid error");
+            
+            addjob(jobs, pid, 1, cmdline);
+            sigprocmask(SIG_UNBLOCK, &mask, NULL);
+
+            waitfg(pid);
+
         }
-        else
-            printf("%d %s", pid, cmdline);
+        else{
+            addjob(jobs, pid, 2, cmdline);
+            printf("[%d] (%d) %s", pid2jid(jobs, pid), pid, cmdline);
+            sigprocmask(SIG_UNBLOCK, &mask, NULL);
+        }
     }
     return;
 
@@ -167,9 +183,6 @@ void eval(char *cmdline)
  */
 int builtin_cmd(char **argv) 
 {
-    if (!strcmp(argv[0], "&")) /* Ignore singleton & */
-        return 1;
-
     /*************************************
     ************************************** Build builtin_cmds: jobs, quit, bg <job>, fg <job>
     **************************************/
@@ -179,17 +192,24 @@ int builtin_cmd(char **argv)
         exit(0);
 
     /* jobs command */   
-    if (!strcmp(argv[0], "jobs")) 
-        exit(0);
+    if (!strcmp(argv[0], "jobs")){
+       listjobs(jobs);
+       return 1;
+    }
 
     /* bg<job> command */
-    if (!strcmp(argv[0], "bg <job>")) 
-        exit(0);
+    if (!strcmp(argv[0], "bg") && argv[1] != NULL){
+        do_bgfg(argv);
+        return 1;
+    }
+        
 
     /* fg<job> command */
-    if (!strcmp(argv[0], "fg <job>")) 
-        exit(0);
-
+    if (!strcmp(argv[0], "fg") && argv[1] != NULL){
+        do_bgfg(argv);
+        return 1;
+    } 
+        
 
     /*****************************************************************************************************/
 
@@ -201,6 +221,17 @@ int builtin_cmd(char **argv)
  */
 void do_bgfg(char **argv) 
 {
+    if(argv[1] == NULL){
+        return;
+    }
+    //Run program in foreground
+    if(!strcmp(argv[0], "fg")){
+
+    }
+    //Run program in background
+    else{
+
+    }
     return;
 }
 
@@ -209,6 +240,10 @@ void do_bgfg(char **argv)
  */
 void waitfg(pid_t pid)
 {
+
+    while(fgpid(jobs) == pid){
+        sleep(1);
+    }
     return;
 }
 
@@ -225,6 +260,39 @@ void waitfg(pid_t pid)
  */
 void sigchld_handler(int sig) 
 {
+    pid_t pid;
+    int status;
+
+    pid = waitpid(-1, &status, WNOHANG|WUNTRACED);
+    ssize_t bytes; 
+    char str[50];
+    const int STDOUT = 1; 
+
+    while ((int)pid > 0){
+        
+        if(WIFEXITED(status)){
+            deletejob(jobs, pid);
+        }
+        if(WIFSIGNALED(status)){
+            sprintf(str, "Job [%d] (%d) terminated by signal %d\n", pid2jid(jobs, pid), pid, WTERMSIG(status));
+            bytes = write(STDOUT, str, strlen(str)); 
+            if(bytes != strlen(str)) 
+                exit(-999);
+            deletejob(jobs, pid);
+        }
+        if (WIFSTOPPED(status)){
+            getjobpid(jobs, pid)->state = 3;
+            sprintf(str, "Job [%d] (%d) stopped by signal %d\n", pid2jid(jobs, pid), pid, WSTOPSIG(status));
+            bytes = write(STDOUT, str, strlen(str)); 
+            if(bytes != strlen(str)) 
+                exit(-999); 
+            return; 
+        }
+        else{
+            return;
+        }
+    }
+
     return;
 }
 
@@ -235,7 +303,13 @@ void sigchld_handler(int sig)
  */
 void sigint_handler(int sig) 
 {
+    pid_t fgpid2;
     
+    fgpid2 = fgpid(jobs);
+    if(!fgpid2){
+        return;
+    }
+    kill(-fgpid2, SIGINT);
     return;
 }
 
@@ -246,6 +320,13 @@ void sigint_handler(int sig)
  */
 void sigtstp_handler(int sig) 
 {
+    pid_t fgpid2;
+    
+    fgpid2 = fgpid(jobs);
+    if(!fgpid2){
+        return;
+    }
+    kill(-fgpid2, SIGTSTP);
     return;
 }
 

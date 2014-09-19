@@ -2,21 +2,25 @@
 #
 # trace01.txt - Properly terminate on EOF.
 #
+
 ./sdriver.pl -t trace02.txt -s ./msh -a "-p"
 #
 # trace02.txt - Process builtin quit command.
 #
+
 ./sdriver.pl -t trace03.txt -s ./msh -a "-p"
 #
 # trace03.txt - Run a foreground job.
 #
 msh> quit
+
 ./sdriver.pl -t trace04.txt -s ./msh -a "-p"
 #
 # trace04.txt - Run a background job.
 #
 msh> ./myspin 1 &
 [1] (26843) ./myspin 1 &
+
 ./sdriver.pl -t trace05.txt -s ./msh -a "-p"
 #
 # trace05.txt - Process jobs builtin command.
@@ -28,12 +32,14 @@ msh> ./myspin 3 &
 msh> jobs
 [1] (26848) Running ./myspin 2 &
 [2] (26850) Running ./myspin 3 &
+
 ./sdriver.pl -t trace06.txt -s ./msh -a "-p"
 #
 # trace06.txt - Forward SIGINT to foreground job.
 #
 msh> ./myspin 4
 Job [1] (26858) terminated by signal 2
+
 ./sdriver.pl -t trace07.txt -s ./msh -a "-p"
 #
 # trace07.txt - Forward SIGINT only to foreground job.
@@ -44,6 +50,7 @@ msh> ./myspin 5
 Job [2] (26866) terminated by signal 2
 msh> jobs
 [1] (26864) Running ./myspin 4 &
+
 ./sdriver.pl -t trace08.txt -s ./msh -a "-p"
 #
 # trace08.txt - Forward SIGTSTP only to foreground job.
@@ -55,6 +62,7 @@ Job [2] (26876) stopped by signal 20
 msh> jobs
 [1] (26874) Running ./myspin 4 &
 [2] (26876) Stopped ./myspin 5 
+
 ./sdriver.pl -t trace09.txt -s ./msh -a "-p"
 #
 # trace09.txt - Process bg builtin command
@@ -71,6 +79,7 @@ msh> bg %2
 msh> jobs
 [1] (26884) Running ./myspin 4 &
 [2] (26886) Running ./myspin 5 
+
 ./sdriver.pl -t trace10.txt -s ./msh -a "-p"
 #
 # trace10.txt - Process fg builtin command. 
@@ -83,6 +92,7 @@ msh> jobs
 [1] (26897) Stopped ./myspin 4 &
 msh> fg %1
 msh> jobs
+
 ./sdriver.pl -t trace11.txt -s ./msh -a "-p"
 #
 # trace11.txt - Forward SIGINT to every process in foreground process group
@@ -112,6 +122,7 @@ msh> /bin/ps a
 26903 pts/2    S+     0:00 /usr/bin/perl ./sdriver.pl -t trace11.txt -s ./msh -a -p
 26904 pts/2    S+     0:00 ./msh -p
 26911 pts/2    R      0:00 /bin/ps a
+
 ./sdriver.pl -t trace12.txt -s ./msh -a "-p"
 #
 # trace12.txt - Forward SIGTSTP to every process in foreground process group
@@ -145,6 +156,7 @@ msh> /bin/ps a
 26916 pts/2    T      0:00 ./mysplit 4
 26917 pts/2    T      0:00 ./mysplit 4
 26920 pts/2    R      0:00 /bin/ps a
+
 ./sdriver.pl -t trace13.txt -s ./msh -a "-p"
 #
 # trace13.txt - Restart every stopped process in process group
@@ -202,6 +214,7 @@ msh> /bin/ps a
 26922 pts/2    S+     0:00 /usr/bin/perl ./sdriver.pl -t trace13.txt -s ./msh -a -p
 26923 pts/2    S+     0:00 ./msh -p
 26934 pts/2    R      0:00 /bin/ps a
+
 ./sdriver.pl -t trace14.txt -s ./msh -a "-p"
 #
 # trace14.txt - Simple error handling
@@ -232,6 +245,7 @@ msh> bg %1
 [1] (26941) ./myspin 4 &
 msh> jobs
 [1] (26941) Running ./myspin 4 &
+
 ./sdriver.pl -t trace15.txt -s ./msh -a "-p"
 #
 # trace15.txt - Putting it all together
@@ -261,6 +275,7 @@ msh> jobs
 [2] (26965) Running ./myspin 4 &
 msh> fg %1
 msh> quit
+
 ./sdriver.pl -t trace16.txt -s ./msh -a "-p"
 #
 # trace16.txt - Tests whether the shell can handle SIGTSTP and SIGINT
