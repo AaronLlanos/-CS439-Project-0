@@ -1,11 +1,11 @@
 ################
 YOUR INFO
 ################
-Name1:
-EID1:
-CS login:
-Email:
-Unique Number:
+Name1: Aaron Llanos
+EID1: al26593
+CS login: al26593
+Email: al26593@utexas.edu
+Unique Number: 53033
 
 Slip days used:
 
@@ -14,7 +14,7 @@ Slip days used:
 ################
 YOUR PARTNER'S INFO
 ################
-Name1:
+Name1: Tarik Alam
 EID1:
 CS login:
 Email:
@@ -63,7 +63,11 @@ Questions regarding Part 0
   the processes beginning with 0 (the original process) and incrementing for
   each child process.
 
+  2^5
+
 (2) In part 0.3, which flavor of exec did you choose to use?  Why?
+
+  execve() because The execve function loads and runs a new program in the context of the current process. The execve function loads and runs the executable object file filename with the argument list argv and the environment variable list envp. In our case of 0.3, our executable object is /bin/ls and the envp variable holds the psh in the background at the top of the stack so that the ls program can return to it after it is finished. 
 
 
 ################
@@ -72,16 +76,24 @@ Questions regarding Part 1
 (1) In the provided utility function Signal(), what does the call to
   sigaction() do?  Why was sigaction() used instead of signal()?
 
+    signal() will define a handler that allows the user to make custom edits to signal processing. However, the handling semantics in signal() are handled differently from system to system. On the other hand, sigaction() is a function that allows the user to handle the semantics of process handling exactly the way they want on Posix-compliant systems. Additionally, this function is hard to use because it requires the user to enter entries of a structure. To overcome this, the Signal() funtion that is provided already calls sigaction() for the user. 
+
 (2) What is the last assembly language instruction executed by the
   signal handler function that you write?  (You may choose either signal
   handler.)
 
+    callq
+
 (3) After the instruction identified in the previous question executes, 
   what is the next assembly language instruction executed?
+
+
 
 (4) When the signal handler finishes running, it must restore all of
   the registers from the interrupted thread to exactly their values
   before the signal occurred. How is this done?
+
+
 
 
 ################

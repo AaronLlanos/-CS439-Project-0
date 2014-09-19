@@ -14,7 +14,7 @@ int main(int argc, char **argv)
   }
   else{
   	pid_t n = (pid_t)strtol(argv[1], NULL, 0);
-  	int val = kill(n, SIGKILL);
+  	int val = kill(n, SIGUSR1);
   	if(val == -1){
   		printf("Couldnt find PID: %d\n", (int)n);
   		exit(1);
