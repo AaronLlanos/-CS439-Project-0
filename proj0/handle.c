@@ -17,7 +17,12 @@
  * Finally, loop forever, printing "Still here\n" once every
  * second.
  */
-void handler(int sig);
+
+
+void alarm_handler(int sig);
+void int_handler(int sig);
+void usr1_handler(int sig);
+
 /*
  * First, print out the process ID of this process.
  *
@@ -37,49 +42,48 @@ int main(int argc, char **argv)
 	pid_t pid;
 	pid = getpid();
 	printf("%i\n", pid);
-	signal(SIGALRM, handler); /* Install SIGALRM handler */
-	signal(SIGINT, handler);  /* Install SIGINT handler */
-	signal(SIGUSR1, handler); /* Install SIGUSR1 handler */
+	Signal(SIGALRM, alarm_handler); /* Install SIGALRM handler */
+	Signal(SIGINT, int_handler);  /* Install SIGINT handler */
+	Signal(SIGUSR1, usr1_handler); /* Install SIGUSR1 handler */
 
 	alarm(1); /* Next SIGALRM will be delivered in 1s */
 
 	while (1) {
 		nanosleep(&timer,NULL);  /* Signal handler returns control here each time */
+		continue;
 	}
 	exit(0);
 }
 
 
-void handler(int sig)
+void alarm_handler(int sig)
 {
-	if(sig == SIGALRM)
-	{
-		ssize_t bytes; 
-		const int STDOUT = 1; 
-		bytes = write(STDOUT, "Still here.\n", 12); 
-		if(bytes != 12) 
-	   		exit(-999);
-	   	alarm(1);
-	}
-	if(sig == SIGINT)
-	{
-		ssize_t bytes; 
-		const int STDOUT = 1; 
-		bytes = write(STDOUT, "Nice try.\n", 10); 
-		if(bytes != 10) 
-	   		exit(-999);
-	    alarm(1);
-	}
-	if(sig == SIGUSR1)
-	{
-		ssize_t bytes; 
-		const int STDOUT = 1; 
-		bytes = write(STDOUT, "Exiting\n", 8); 
-		if(bytes != 8) 
-	   		exit(1);
-	   	exit(1);
-	}
+	ssize_t bytes; 
+	const int STDOUT = 1; 
+	bytes = write(STDOUT, "Still here.\n", 12); 
+	if(bytes != 12) 
+   		exit(-999);
+   	alarm(1);
 	
+}
+void int_handler(int sig)
+{
+
+	ssize_t bytes; 
+	const int STDOUT = 1; 
+	bytes = write(STDOUT, "Nice try.\n", 10); 
+	if(bytes != 10) 
+   		exit(-999);
+    alarm(1);
+}
+void usr1_handler(int sig)
+{
+	ssize_t bytes; 
+	const int STDOUT = 1; 
+	bytes = write(STDOUT, "exiting\n", 8); 
+	if(bytes != 8) 
+   		exit(1);
+   	exit(1);
 }
 
 

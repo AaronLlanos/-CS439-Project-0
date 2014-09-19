@@ -123,7 +123,39 @@ int main(int argc, char **argv)
 */
 void eval(char *cmdline) 
 {
+    char *argv[MAXARGS]; /* Argument list execve() */
+    char buf[MAXLINE];
+    /* Holds modified command line */
+    int bg;
+    /* Should the job run in bg or fg? */
+    pid_t pid;
+    /* Process id */
+
+    strcpy(buf, cmdline);
+    bg = parseline(buf, argv);
+
+    if (argv[0] == NULL)
+        return;
+        /* Ignore empty lines */
+    if (!builtin_cmd(argv)) {
+        if ((pid = fork()) == 0) {
+        /* Child runs user job */
+            if (execve(argv[0], argv, environ) < 0) {
+                printf("%s: Command not found.\n", argv[0]);
+                exit(0);
+            }
+        }
+        /* Parent waits for foreground job to terminate */
+        if (!bg) {
+            int status;
+        if (waitpid(pid, &status, 0) < 0)
+            unix_error("waitfg: waitpid error");
+        }
+        else
+            printf("%d %s", pid, cmdline);
+    }
     return;
+
 }
 
 
@@ -135,6 +167,32 @@ void eval(char *cmdline)
  */
 int builtin_cmd(char **argv) 
 {
+    if (!strcmp(argv[0], "&")) /* Ignore singleton & */
+        return 1;
+
+    /*************************************
+    ************************************** Build builtin_cmds: jobs, quit, bg <job>, fg <job>
+    **************************************/
+
+    /* quit command */   
+    if (!strcmp(argv[0], "quit")) 
+        exit(0);
+
+    /* jobs command */   
+    if (!strcmp(argv[0], "jobs")) 
+        exit(0);
+
+    /* bg<job> command */
+    if (!strcmp(argv[0], "bg <job>")) 
+        exit(0);
+
+    /* fg<job> command */
+    if (!strcmp(argv[0], "fg <job>")) 
+        exit(0);
+
+
+    /*****************************************************************************************************/
+
     return 0;     /* not a builtin command */
 }
 
@@ -177,6 +235,7 @@ void sigchld_handler(int sig)
  */
 void sigint_handler(int sig) 
 {
+    
     return;
 }
 
