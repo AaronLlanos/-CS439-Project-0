@@ -1,3 +1,10 @@
+/*  Program authors: Aaron Llanos, al26593(Log ID) 
+                     Tarequl Alam, tarik90(Log ID) 
+    Dates: 9/18
+    Description of program: Program with implementation of 
+    SIGALRM, SIGINT and SIGURS1 handler
+*/
+
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
@@ -32,6 +39,8 @@ void usr1_handler(int sig);
  * Finally, loop forever, printing "Still here\n" once every
  * second.
  */
+
+ //Tarequl driving now
 int main(int argc, char **argv)
 {
 
@@ -40,6 +49,8 @@ int main(int argc, char **argv)
 	timer.tv_nsec=1000000000;
 
 	pid_t pid;
+
+	//Getting the current pid
 	pid = getpid();
 	printf("%i\n", pid);
 	Signal(SIGALRM, alarm_handler); /* Install SIGALRM handler */
@@ -55,7 +66,9 @@ int main(int argc, char **argv)
 	exit(0);
 }
 
-
+//End of Tarequl driving, Aaron driving now
+//SIGALRM handler
+//Print "Still here" with 1 second interval
 void alarm_handler(int sig)
 {
 	ssize_t bytes; 
@@ -66,9 +79,11 @@ void alarm_handler(int sig)
    	alarm(1);
 	
 }
+
+//SIGINT handler
+//Prints "Nice try" when press CTRL+C
 void int_handler(int sig)
 {
-
 	ssize_t bytes; 
 	const int STDOUT = 1; 
 	bytes = write(STDOUT, "Nice try.\n", 10); 
@@ -76,6 +91,8 @@ void int_handler(int sig)
    		exit(-999);
     alarm(1);
 }
+
+//SIGUSR1 handler
 void usr1_handler(int sig)
 {
 	ssize_t bytes; 
@@ -86,4 +103,4 @@ void usr1_handler(int sig)
    	exit(1);
 }
 
-
+//End of Aaron driving
