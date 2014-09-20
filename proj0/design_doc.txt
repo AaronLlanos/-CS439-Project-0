@@ -82,12 +82,16 @@ Questions regarding Part 1
   signal handler function that you write?  (You may choose either signal
   handler.)
 
-    callq
+    Runs "callq" at the end
 
 (3) After the instruction identified in the previous question executes, 
   what is the next assembly language instruction executed?
 
+<<<<<<< HEAD
   
+=======
+  "jmp" after "callq"
+>>>>>>> 8796bae09f994856032a528468d7a5cdabe4f8dd
 
 (4) When the signal handler finishes running, it must restore all of
   the registers from the interrupted thread to exactly their values
