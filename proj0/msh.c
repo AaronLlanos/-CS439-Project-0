@@ -1,7 +1,12 @@
 /* 
  * msh - A mini shell program with job control
  * 
- * <Put your name and login ID here>
+ *  
+    Program authors: Aaron Llanos, al26593(Log ID) 
+                     Tarequl Alam, tarik90(Log ID) 
+    Dates: 9/17, 9/18, 9/19
+    Description of program: Shell program that runs basic 
+    commands lines and four build-in command
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -96,7 +101,11 @@ int main(int argc, char **argv)
     	}
     	if ((fgets(cmdline, MAXLINE, stdin) == NULL) && ferror(stdin))
     	    app_error("fgets error");
+<<<<<<< HEAD
     	if (feof(stdin)) { /* End of file (ctrl-d) */
+=======
+    	if (feof(stdin)) {/* End of file (ctrl-d) */
+>>>>>>> 8796bae09f994856032a528468d7a5cdabe4f8dd
     	    fflush(stdout);
     	    exit(0);
     	}
@@ -121,6 +130,8 @@ int main(int argc, char **argv)
  * background children don't receive SIGINT (SIGTSTP) from the kernel
  * when we type ctrl-c (ctrl-z) at the keyboard.  
 */
+
+ //Aaron drove here
 void eval(char *cmdline) 
 {
     char *argv[MAXARGS]; /* Argument list execve() */
@@ -171,7 +182,7 @@ void eval(char *cmdline)
         }
     }
     return;
-
+//End of Aaron driving
 }
 
 
@@ -181,6 +192,8 @@ void eval(char *cmdline)
  * Return 1 if a builtin command was executed; return 0
  * if the argument passed in is *not* a builtin command.
  */
+
+ //Tarequl driving now
 int builtin_cmd(char **argv) 
 {
     /*************************************
@@ -215,7 +228,7 @@ int builtin_cmd(char **argv)
 
     return 0;     /* not a builtin command */
 }
-
+//End of Tarequl driving, Aaron driving now
 /* 
  * do_bgfg - Execute the builtin bg and fg commands
  */
@@ -225,12 +238,27 @@ void do_bgfg(char **argv)
         return;
     }
     //Run program in foreground
+<<<<<<< HEAD
     if(!strcmp(argv[0], "fg")){
 
     }
     //Run program in background
     else{
 
+=======
+    if(!strcmp(argv[0], "fg"))
+    {
+        if (fgpid(jobs) !=0) 
+        {
+            kill(fgpid(jobs), SIGCONT);
+        }
+
+    }
+    //Run program in background
+    else if (!strcmp(argv[0], "bg")){
+
+            kill(getpid(), SIGCONT);
+>>>>>>> 8796bae09f994856032a528468d7a5cdabe4f8dd
     }
     return;
 }
@@ -270,9 +298,18 @@ void sigchld_handler(int sig)
 
     while ((int)pid > 0){
         
+<<<<<<< HEAD
         if(WIFEXITED(status)){
             deletejob(jobs, pid);
         }
+=======
+        //if child process exited normally
+        if(WIFEXITED(status)){
+            deletejob(jobs, pid);
+        }
+
+        //if a child terminates by a signal raise by the child itself
+>>>>>>> 8796bae09f994856032a528468d7a5cdabe4f8dd
         if(WIFSIGNALED(status)){
             sprintf(str, "Job [%d] (%d) terminated by signal %d\n", pid2jid(jobs, pid), pid, WTERMSIG(status));
             bytes = write(STDOUT, str, strlen(str)); 
@@ -280,7 +317,14 @@ void sigchld_handler(int sig)
                 exit(-999);
             deletejob(jobs, pid);
         }
+<<<<<<< HEAD
         if (WIFSTOPPED(status)){
+=======
+
+        //if the child process is currently stopped
+        if (WIFSTOPPED(status)){
+            //getting job id of a stopped job
+>>>>>>> 8796bae09f994856032a528468d7a5cdabe4f8dd
             getjobpid(jobs, pid)->state = 3;
             sprintf(str, "Job [%d] (%d) stopped by signal %d\n", pid2jid(jobs, pid), pid, WSTOPSIG(status));
             bytes = write(STDOUT, str, strlen(str)); 
@@ -296,19 +340,30 @@ void sigchld_handler(int sig)
     return;
 }
 
+//End of Arron driving
 /* 
  * sigint_handler - The kernel sends a SIGINT to the shell whenver the
  *    user types ctrl-c at the keyboard.  Catch it and send it along
  *    to the foreground job.  
  */
+
+//Aaron and Tarequl drove here
 void sigint_handler(int sig) 
 {
     pid_t fgpid2;
     
+<<<<<<< HEAD
+=======
+    //checking for forgeground job
+>>>>>>> 8796bae09f994856032a528468d7a5cdabe4f8dd
     fgpid2 = fgpid(jobs);
     if(!fgpid2){
         return;
     }
+<<<<<<< HEAD
+=======
+    //passing signal to child
+>>>>>>> 8796bae09f994856032a528468d7a5cdabe4f8dd
     kill(-fgpid2, SIGINT);
     return;
 }
@@ -318,15 +373,27 @@ void sigint_handler(int sig)
  *     the user types ctrl-z at the keyboard. Catch it and suspend the
  *     foreground job by sending it a SIGTSTP.  
  */
+
+ //SIGSTOP handler 
 void sigtstp_handler(int sig) 
 {
     pid_t fgpid2;
     
+<<<<<<< HEAD
+=======
+    //checking for forgeground job
+>>>>>>> 8796bae09f994856032a528468d7a5cdabe4f8dd
     fgpid2 = fgpid(jobs);
     if(!fgpid2){
         return;
     }
+<<<<<<< HEAD
     kill(-fgpid2, SIGTSTP);
+=======
+    //passing signal to child
+    kill(-fgpid2, SIGTSTP);
+
+>>>>>>> 8796bae09f994856032a528468d7a5cdabe4f8dd
     return;
 }
 
