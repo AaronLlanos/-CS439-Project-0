@@ -158,7 +158,7 @@ void eval(char *cmdline)
             sigprocmask(SIG_UNBLOCK, &mask, NULL);
             setpgid(0, 0);
             if (execve(argv[0], argv, environ) < 0) {
-                printf("%s: Command not found.\n", argv[0]);
+                printf("%s: Command not found\n", argv[0]);
                 exit(0);
             }
         }
@@ -206,6 +206,18 @@ int builtin_cmd(char **argv)
 
     /* bg<job> command */
     if (!strcmp(argv[0], "bg")){
+
+
+        ssize_t bytes;
+        const int STDOUT = 1; 
+
+        if(argv[1] == NULL){
+            bytes = write(STDOUT, "requires PID or \%jobbid argument\n", 34); 
+            if(bytes != 34) 
+                exit(-999);
+            return 1;
+        }
+
         do_bgfg(argv);
         return 1;
     }
@@ -213,6 +225,17 @@ int builtin_cmd(char **argv)
 
     /* fg<job> command */
     if (!strcmp(argv[0], "fg")){
+
+        ssize_t bytes;
+        const int STDOUT = 1; 
+
+        if(argv[1] == NULL){
+            bytes = write(STDOUT, "requires PID or \%jobbid argument\n", 34); 
+            if(bytes != 34) 
+                exit(-999);
+            return 1;
+        }
+
         do_bgfg(argv);
         return 1;
     } 
@@ -228,14 +251,27 @@ int builtin_cmd(char **argv)
  */
 void do_bgfg(char **argv) 
 {
-    if(argv[1] == NULL){
-        return;
-    }
-    char * arg = argv[1];
+
     pid_t pid;
     int jid;
-    char tmp[strlen(arg)-1];
     int i;
+    ssize_t bytes;
+    const int STDOUT = 1; 
+    char * arg = argv[1];
+    char tmp[strlen(arg)-1];
+    char str[30];
+
+
+    //Error handling statements
+    for (i = 0; i < strlen(arg); i++) {
+        if (!isdigit(arg[i]) && arg[i] != '%'){
+            bytes = write(STDOUT, "argument must be a PID or \%jobid\n", 34); 
+            if(bytes != 34) 
+                exit(-999);
+            return;
+            
+        }
+    }
 
     //Check if arg refers to PID x by checking if first character != %
     if(arg[0] != '%'){
@@ -246,6 +282,9 @@ void do_bgfg(char **argv)
         }
         //Else return and do nothing
         else{
+            bytes = write(STDOUT, "No such process\n", 12); 
+            if(bytes != 12) 
+                exit(-999);
             return;
         }
     }
@@ -260,24 +299,29 @@ void do_bgfg(char **argv)
         if(getjobjid(jobs, jid)){
             pid = getjobjid(jobs, jid)->pid;
         }
-        //Else return and do nothing
+        //Else return and do nothing jid does not exist
         else{
+            sprintf(str, "%c%d: No such job\n", '%', jid);
+            bytes = write(STDOUT, str, strlen(str)); 
+            if(bytes != strlen(str)) 
+                exit(-999); 
             return;
         }
     }
     //Change process -> foreground
     if(!strcmp(argv[0], "fg")){
-        //Check if job is already in foreground. If there is one, send it to background
-        if(fgpid(jobs)){
-            
-        }
+
         getjobpid(jobs, pid)->state = 1;
-        kill(pid, SIGCONT);
+        kill(-pid, SIGCONT);
+        waitfg(pid);
+
     }
+
     //Change process -> background
     else if(!strcmp(argv[0], "bg")){
-        kill(pid, SIGCONT);
         getjobpid(jobs, pid)->state = 2;
+        kill(-pid, SIGCONT);
+        printf("[%d] (%d) %s", pid2jid(jobs, pid), pid, getjobpid(jobs, pid)->cmdline);
     }
     return;
 }
@@ -370,7 +414,7 @@ void sigtstp_handler(int sig)
     pid_t fgpid2;
     
     fgpid2 = fgpid(jobs);
-    if(!fgpid2){
+    if(fgpid2 == 0){
         return;
     }
     kill(-fgpid2, SIGTSTP);

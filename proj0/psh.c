@@ -1,12 +1,7 @@
 /* 
  * psh - A prototype tiny shell program with job control
  * 
- * 
-    Program authors: Aaron Llanos, al26593(Log ID) 
-                     Tarequl Alam, tarik90(Log ID) 
-    Dates: 9/17
-    Description of program: Shell program that runs basic 
-    commands lines and "quit" build-in command
+ * <Put your name and login ID here>
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -107,11 +102,6 @@ int main(int argc, char **argv)
  * run the job in the context of the child. If the job is running in
  * the foreground, wait for it to terminate and then return. 
 */
-
- /*Code taken from "Computer System-A Programmers Prospective " by 
-   Bryant abd O'Hallaron. Page 735*/
-
- //Aaron and Tarequl drove here
 void eval(char *cmdline) 
 {
     char *argv[MAXARGS]; /* Argument list execve() */
@@ -156,16 +146,8 @@ void eval(char *cmdline)
  * Return 1 if a builtin command was executed; return 0
  * if the argument passed in is *not* a builtin command.
  */
- /*
- *Code taken from "Computer System-A Programmers Prospective " by 
-   Bryant abd O'Hallaron. Page 735
- * If first arg is a builtin command, run it and return true 
- */
-
- //Aaron driving now
 int builtin_cmd(char **argv) 
 {
-    //Check for "QUIT" buildin command
     if (!strcmp(argv[0], "quit")) /* quit command */
         exit(0);
     if (!strcmp(argv[0], "&")) /* Ignore singleton & */
@@ -173,7 +155,7 @@ int builtin_cmd(char **argv)
     return 0;  /* Not a builtin command */
 
 }
-//End of Aaron driving
+
 
 
 

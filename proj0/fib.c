@@ -57,8 +57,6 @@ int main(int argc, char **argv)
  * a new child for each call. Each process should call
  * doFib() exactly once.
  */
-
- // Aaron driving now
 static void doFib(int n, int doPrint)
 {
   //Base case, return n if n<2
@@ -71,7 +69,7 @@ static void doFib(int n, int doPrint)
   else{
     pid_t pid1, pid2;
     int status1, status2;
-    //first fork
+
     pid1 = fork();
 
       /* Code executed by first child */
@@ -84,7 +82,7 @@ static void doFib(int n, int doPrint)
         wait(&status1);
         //Reap first Child
         status1 = WEXITSTATUS(status1);
-        //2nd fork
+
         pid2 = fork();
         /* Code executed by second child */
         if (pid2 == 0) {     
@@ -98,11 +96,9 @@ static void doFib(int n, int doPrint)
           if(doPrint){
             printf("%d\n", status1+status2);
           }
-          //exit with the final fibonacci number
           exit(status1+status2);
         }
       }
   }
 
 }
-//End of Aaron driving
